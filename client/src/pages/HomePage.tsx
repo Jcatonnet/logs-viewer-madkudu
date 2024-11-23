@@ -1,6 +1,7 @@
 import React from 'react';
 import useAuth from '../hooks/useAuth';
 import FileUpload from '../components/FileUpload';
+import LogsList from '../components/LogsList';
 
 const HomePage: React.FC = () => {
     const { isAuthenticated } = useAuth();
@@ -13,6 +14,7 @@ const HomePage: React.FC = () => {
         <div>
             <h1>Dashboard</h1>
             <FileUpload />
+            <LogsList />
         </div>
     );
 };

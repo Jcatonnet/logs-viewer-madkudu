@@ -14,4 +14,9 @@ model LogEvent {
   level      String
   message    String
   lineNumber Int
+
+  @@index([timestamp])
+  @@index([service])
+  @@index([level])
 }
+
