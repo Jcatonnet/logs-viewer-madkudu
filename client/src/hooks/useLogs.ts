@@ -1,0 +1,64 @@
+import { useState, useEffect } from 'react';
+import apiClient from '../services/apiClient';
+import useAuth from './useAuth';
+
+interface LogEvent {
+    id: number;
+    timestamp: string;
+    service: string;
+    level: string;
+    message: string;
+    lineNumber: number;
+}
+
+interface MetaData {
+    total: number;
+    page: number;
+    pages: number;
+}
+
+interface Filters {
+    level: string;
+    service: string;
+    message: string;
+    sortBy: string;
+    order: string;
+}
+
+export const useLogs = (filters: Filters, refreshLogs: boolean) => {
+    const [logs, setLogs] = useState<LogEvent[]>([]);
+    const [meta, setMeta] = useState<MetaData>({ total: 0, page: 1, pages: 1 });
+    const [loading, setLoading] = useState<boolean>(false);
+    const { getAccessToken } = useAuth();
+
+    const fetchLogs = async (page = 1) => {
+        setLoading(true);
+        try {
+            const token = await getAccessToken();
+            const response = await apiClient.get('/logs', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    page,
+                    limit: 25,
+                    ...filters,
+                },
+            });
+
+            setLogs(response.data.data);
+            setMeta(response.data.meta);
+        } catch (error) {
+            console.error('Error fetching logs:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLogs(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters, refreshLogs]);
+
+    return { logs, meta, loading, fetchLogs };
+};

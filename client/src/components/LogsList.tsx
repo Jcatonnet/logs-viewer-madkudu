@@ -1,32 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Pagination, Form, Row, Col } from 'react-bootstrap';
-import apiClient from '../services/apiClient';
-import useAuth from '../hooks/useAuth';
+import React, { useState } from 'react';
+import { Pagination } from 'react-bootstrap';
+import { useLogs } from '../hooks/useLogs';
+import LogsTable from './LogsTable';
+import LogFilters from './LogsFilters';
 
-interface LogEvent {
-    id: number;
-    timestamp: string;
-    service: string;
-    level: string;
-    message: string;
-    lineNumber: number;
-}
-
-interface MetaData {
-    total: number;
-    page: number;
-    pages: number;
-}
 interface LogListProps {
     refreshLogs: boolean;
 }
 
 const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
-    const [logs, setLogs] = useState<LogEvent[]>([]);
-    const [meta, setMeta] = useState<MetaData>({ total: 0, page: 1, pages: 1 });
-    const [loading, setLoading] = useState<boolean>(false);
-    const { getAccessToken } = useAuth();
-
     const [filters, setFilters] = useState({
         level: '',
         service: '',
@@ -35,37 +17,7 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
         order: 'desc',
     });
 
-    useEffect(() => {
-        fetchLogs();
-    }, [refreshLogs]);
-
-    const fetchLogs = async (page = 1) => {
-        setLoading(true);
-        try {
-            const token = await getAccessToken();
-            const response = await apiClient.get('/logs', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                params: {
-                    page,
-                    limit: 25,
-                    ...filters,
-                },
-            });
-
-            setLogs(response.data.data);
-            setMeta(response.data.meta);
-        } catch (error) {
-            console.error('Error fetching logs:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchLogs(1);
-    }, [filters]);
+    const { logs, meta, loading, fetchLogs } = useLogs(filters, refreshLogs);
 
     const handlePageChange = (pageNumber: number) => {
         fetchLogs(pageNumber);
@@ -75,7 +27,7 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
         const { name, value } = e.target;
         setFilters({
             ...filters,
-            [name]: value,
+            [name]: value.trim(),
         });
     };
 
@@ -106,80 +58,12 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
     return (
         <div>
             <h2>Log Events</h2>
-            <Form>
-                <Row>
-                    <Col>
-                        <Form.Group controlId="filterService">
-                            <Form.Label>Service</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="service"
-                                value={filters.service}
-                                onChange={handleFilterChange}
-                                placeholder="Service name"
-                            />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="filterLevel">
-                            <Form.Label>Level</Form.Label>
-                            <Form.Control
-                                as="select"
-                                name="level"
-                                value={filters.level}
-                                onChange={handleFilterChange}
-                            >
-                                <option value="">All</option>
-                                <option value="INFO">INFO</option>
-                                <option value="WARNING">WARNING</option>
-                                <option value="ERROR">ERROR</option>
-                                <option value="DEBUG">DEBUG</option>
-                                <option value="CRITICAL">CRITICAL</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="filterMessage">
-                            <Form.Label>Message</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="message"
-                                value={filters.message}
-                                onChange={handleFilterChange}
-                                placeholder="Search message"
-                            />
-                        </Form.Group>
-                    </Col>
-                    <Col className="d-flex align-items-end">
-                    </Col>
-                </Row>
-            </Form>
+            <LogFilters filters={filters} handleFilterChange={handleFilterChange} />
             {loading ? (
                 <p>Loading logs...</p>
             ) : (
                 <>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th onClick={() => handleSortChange('id')}>ID</th>
-                                <th onClick={() => handleSortChange('timestamp')}>Timestamp</th>
-                                <th onClick={() => handleSortChange('service')}>Service</th>
-                                <th onClick={() => handleSortChange('level')}>Level</th>
-                                <th>Message</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {logs.map((log) => (
-                                <tr key={log.id}>
-                                    <td>{log.id}</td>
-                                    <td>{new Date(log.timestamp).toLocaleString()}</td>
-                                    <td>{log.service}</td>
-                                    <td>{log.level}</td>
-                                    <td>{log.message}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
+                    <LogsTable logs={logs} handleSortChange={handleSortChange} />
                     <Pagination>{renderPagination()}</Pagination>
                 </>
             )}
