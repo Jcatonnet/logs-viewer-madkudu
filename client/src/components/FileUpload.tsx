@@ -1,6 +1,10 @@
+// src/components/FileUpload.tsx
+
 import React, { useState } from 'react';
-import axios from 'axios';
+import { Form, Button, Alert, ProgressBar } from 'react-bootstrap';
+
 import useAuth from '../hooks/useAuth';
+import apiClient from '../services/apiClient';
 
 interface Error {
     lineNumber: number;
@@ -10,6 +14,7 @@ interface Error {
 const FileUpload: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
     const [errors, setErrors] = useState<Error[]>([]);
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
     const { getAccessToken } = useAuth();
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,16 +34,18 @@ const FileUpload: React.FC = () => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/upload`,
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
+            const response = await apiClient.post('/upload', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round(
+                        (progressEvent.loaded * 100) / progressEvent.total!
+                    );
+                    setUploadProgress(percentCompleted);
+                },
+            });
 
             if (response.data.errors) {
                 setErrors(response.data.errors);
@@ -58,13 +65,25 @@ const FileUpload: React.FC = () => {
     return (
         <div>
             <h2>Upload CSV File</h2>
-            <form onSubmit={handleSubmit}>
-                <input type="file" accept=".csv" onChange={handleFileChange} required />
-                <button type="submit">Upload</button>
-            </form>
+            <Form onSubmit={handleSubmit}>
+                <Form.Group>
+                    <Form.Control
+                        type="file"
+                        onChange={handleFileChange}
+                        required
+                        accept=".csv"
+                    />
+                </Form.Group>
+                <Button type="submit" disabled={!file}>
+                    Upload
+                </Button>
+            </Form>
+            {uploadProgress > 0 && uploadProgress < 100 && (
+                <ProgressBar now={uploadProgress} label={`${uploadProgress}%`} />
+            )}
             {errors.length > 0 && (
-                <div>
-                    <h3>Errors Found:</h3>
+                <Alert variant="danger" className="mt-3">
+                    <h4>Errors Found:</h4>
                     <ul>
                         {errors.map((error) => (
                             <li key={error.lineNumber}>
@@ -73,7 +92,7 @@ const FileUpload: React.FC = () => {
                         ))}
                     </ul>
                     <p>Please correct the errors in the CSV file and try again.</p>
-                </div>
+                </Alert>
             )}
         </div>
     );
