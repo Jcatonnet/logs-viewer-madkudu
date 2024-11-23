@@ -1,4 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
+import { useCallback } from 'react';
 
 const useAuth = () => {
     const {
@@ -11,14 +12,23 @@ const useAuth = () => {
         error,
     } = useAuth0();
 
+    const login = useCallback(() => loginWithRedirect(), [loginWithRedirect]);
+
+    const logoutUser = useCallback(
+        () => logout({ logoutParams: { returnTo: window.location.origin } }),
+        [logout]
+    );
+
+    const getAccessToken = useCallback(() => getAccessTokenSilently(), [getAccessTokenSilently]);
+
     return {
         isAuthenticated,
         isLoading,
         user,
         error,
-        login: () => loginWithRedirect(),
-        logout: () => logout({ logoutParams: { returnTo: window.location.origin } }),
-        getAccessToken: () => getAccessTokenSilently(),
+        login,
+        logout: logoutUser,
+        getAccessToken,
     };
 };
 

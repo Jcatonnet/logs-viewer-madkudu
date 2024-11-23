@@ -3,7 +3,7 @@ import { Navbar, Nav, Button } from 'react-bootstrap';
 import useAuth from '../hooks/useAuth';
 
 const AppNavbar: React.FC = () => {
-    const { isAuthenticated, login, logout } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
 
     return (
         <Navbar bg="primary" variant="dark" expand="lg">
@@ -11,13 +11,9 @@ const AppNavbar: React.FC = () => {
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="ml-auto">
-                    {isAuthenticated ? (
+                    {isAuthenticated && (
                         <Button variant="outline-light" onClick={logout}>
                             Log Out
-                        </Button>
-                    ) : (
-                        <Button variant="outline-light" onClick={login}>
-                            Log In
                         </Button>
                     )}
                 </Nav>

@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { getLogs } from '../controllers/logController';
+import { getLogAggregation, getLogs } from '../controllers/logController';
 
 const router = Router();
 
 router.get('/', getLogs);
+router.get('/aggregate', getLogAggregation);
 
 export default router;

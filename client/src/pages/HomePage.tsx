@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import FileUpload from '../components/FileUpload';
 import LogsList from '../components/LogsList';
+import LogGraph from '../components/LogGraph';
 
 const HomePage: React.FC = () => {
     const { isAuthenticated, login } = useAuth();
@@ -26,6 +27,7 @@ const HomePage: React.FC = () => {
         <div>
             <h1>Welcome to the Log Viewer Application</h1>
             <FileUpload onUploadSuccess={handleUploadSuccess} />
+            <LogGraph refreshLogs={refreshLogs} />
             <LogsList refreshLogs={refreshLogs} />
         </div>
     );
