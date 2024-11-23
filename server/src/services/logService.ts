@@ -133,3 +133,25 @@ export const getLogAggregation = async (groupBy: string): Promise<AggregationRes
 
     return formattedData;
 };
+
+export const getUniqueServices = async (): Promise<string[]> => {
+    const services = await prisma.logEvent.findMany({
+        select: {
+            service: true,
+        },
+        distinct: ['service'],
+    });
+
+    return services.map((item) => item.service);
+};
+
+export const getUniqueLevels = async (): Promise<string[]> => {
+    const levels = await prisma.logEvent.findMany({
+        select: {
+            level: true,
+        },
+        distinct: ['level'],
+    });
+
+    return levels.map((item) => item.level);
+};

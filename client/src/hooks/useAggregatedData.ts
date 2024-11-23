@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import apiClient from '../services/apiClient';
+import { fetchAggregatedDataService } from '../services/logService';
 import useAuth from './useAuth';
 
 interface AggregatedData {
@@ -8,20 +8,20 @@ interface AggregatedData {
     services?: { [key: string]: number };
 }
 
-export const useAggregatedData = (groupBy: string, refresh: boolean) => {
+export const useAggregatedData = (
+    groupBy: string,
+    refresh: boolean
+): { data: AggregatedData[]; loading: boolean } => {
     const { getAccessToken } = useAuth();
-    const [data, setData] = useState<AggregatedData[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const fetchAggregatedData = useCallback(async () => {
         setLoading(true);
         try {
             const token = await getAccessToken();
-            const response = await apiClient.get('/logs/aggregate', {
-                headers: { Authorization: `Bearer ${token}` },
-                params: { groupBy },
-            });
-            setData(response.data || []);
+            const responseData = await fetchAggregatedDataService(groupBy, token);
+            setData(responseData);
         } catch (error) {
             console.error('Error fetching aggregated data:', error);
             setData([]);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pagination } from 'react-bootstrap';
 import { useLogs } from '../hooks/useLogs';
+import { useFilterOptions } from '../hooks/useFilterOptions';
 import LogsTable from './LogsTable';
 import LogFilters from './LogsFilters';
 
@@ -18,16 +19,19 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
     });
 
     const { logs, meta, loading, fetchLogs } = useLogs(filters, refreshLogs);
+    const { serviceOptions, levelOptions, loading: optionsLoading } = useFilterOptions();
 
     const handlePageChange = (pageNumber: number) => {
         fetchLogs(pageNumber);
     };
 
-    const handleFilterChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleFilterChange = (
+        e: React.ChangeEvent<HTMLTextAreaElement>
+    ) => {
         const { name, value } = e.target;
         setFilters({
             ...filters,
-            [name]: value.trim(),
+            [name]: value,
         });
     };
 
@@ -58,7 +62,13 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
     return (
         <div>
             <h3>Log Events</h3>
-            <LogFilters filters={filters} handleFilterChange={handleFilterChange} />
+            <LogFilters
+                filters={filters}
+                handleFilterChange={handleFilterChange}
+                serviceOptions={serviceOptions}
+                levelOptions={levelOptions}
+                loading={optionsLoading}
+            />
             {loading ? (
                 <p>Loading logs...</p>
             ) : (

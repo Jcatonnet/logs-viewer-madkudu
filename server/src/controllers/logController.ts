@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import {
     getLogs as getLogsService,
     getLogAggregation as getLogAggregationService,
+    getUniqueServices,
+    getUniqueLevels,
 } from '../services/logService';
 
 export const getLogs = async (req: Request, res: Response): Promise<void> => {
@@ -58,5 +60,25 @@ export const getLogAggregation = async (req: Request, res: Response): Promise<vo
         } else {
             res.status(500).json({ error: 'Error fetching log aggregation' });
         }
+    }
+};
+
+export const getServices = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const services = await getUniqueServices();
+        res.json(services);
+    } catch (error) {
+        console.error('Error fetching services:', error);
+        res.status(500).json({ error: 'Error fetching services' });
+    }
+};
+
+export const getLevels = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const levels = await getUniqueLevels();
+        res.json(levels);
+    } catch (error) {
+        console.error('Error fetching levels:', error);
+        res.status(500).json({ error: 'Error fetching levels' });
     }
 };

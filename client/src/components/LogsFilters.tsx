@@ -10,21 +10,37 @@ interface Filters {
 interface LogFiltersProps {
     filters: Filters;
     handleFilterChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    serviceOptions: string[];
+    levelOptions: string[];
+    loading: boolean;
 }
 
-const LogFilters: React.FC<LogFiltersProps> = ({ filters, handleFilterChange }) => (
+const LogFilters: React.FC<LogFiltersProps> = ({
+    filters,
+    handleFilterChange,
+    serviceOptions,
+    levelOptions,
+    loading,
+}) => (
     <Form>
         <Row>
             <Col>
                 <Form.Group controlId="filterService">
                     <Form.Label>Service</Form.Label>
                     <Form.Control
-                        type="text"
+                        as="select"
                         name="service"
                         value={filters.service}
                         onChange={handleFilterChange}
-                        placeholder="Service name"
-                    />
+                        disabled={loading}
+                    >
+                        <option value="">All</option>
+                        {serviceOptions.map((service, idx) => (
+                            <option key={idx} value={service}>
+                                {service.toLowerCase()}
+                            </option>
+                        ))}
+                    </Form.Control>
                 </Form.Group>
             </Col>
             <Col>
@@ -35,13 +51,14 @@ const LogFilters: React.FC<LogFiltersProps> = ({ filters, handleFilterChange }) 
                         name="level"
                         value={filters.level}
                         onChange={handleFilterChange}
+                        disabled={loading}
                     >
                         <option value="">All</option>
-                        <option value="INFO">INFO</option>
-                        <option value="WARNING">WARNING</option>
-                        <option value="ERROR">ERROR</option>
-                        <option value="DEBUG">DEBUG</option>
-                        <option value="CRITICAL">CRITICAL</option>
+                        {levelOptions.map((level, idx) => (
+                            <option key={idx} value={level}>
+                                {level.toLowerCase()}
+                            </option>
+                        ))}
                     </Form.Control>
                 </Form.Group>
             </Col>
