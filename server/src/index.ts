@@ -3,13 +3,21 @@ import cors from 'cors';
 import checkJwt from './middleware/auth';
 import dotenv from 'dotenv';
 import prisma from './prisma';
+import uploadRoutes from './routes/upload';
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+    cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+    })
+);
 app.use(express.json());
+
+app.use('/api', uploadRoutes);
 
 app.get('/api/test-db', async (req, res) => {
     try {
