@@ -1,27 +1,40 @@
-import React from 'react';
-
-import AppNavbar from './components/Navbar';
-
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import GraphsPage from './pages/GraphPage';
+import Navbar from './components/Navbar';
+import DashboardPage from './pages/DashboardPage';
 
 const App: React.FC = () => {
-  const { isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  const [refreshLogs, setRefreshLogs] = useState<boolean>(false);
+
+  const handleUploadSuccess = () => {
+    setRefreshLogs((prev) => !prev);
+  };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <p>Loading...</p>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
   }
 
   return (
-    <BrowserRouter>
-      <AppNavbar />
+    <Router>
+      <Navbar />
       <div className="container mt-4">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/dashboard"
+            element={<DashboardPage onUploadSuccess={handleUploadSuccess} refreshLogs={refreshLogs} />}
+          />
+          <Route path="/graphs" element={<GraphsPage refreshLogs={refreshLogs} />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </Router>
   );
 };
 

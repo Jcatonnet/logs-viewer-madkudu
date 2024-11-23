@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import prisma from '../prisma/prisma';
-import { Prisma } from '@prisma/client';
-
-type AggregationResult =
-    | { group: string; levels: { [key: string]: number } }
-    | { group: string; services: { [key: string]: number } };
+import {
+    getLogs as getLogsService,
+    getLogAggregation as getLogAggregationService,
+} from '../services/logService';
 
 export const getLogs = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -21,46 +19,17 @@ export const getLogs = async (req: Request, res: Response): Promise<void> => {
         const pageNumber = parseInt(page as string, 10);
         const pageSize = parseInt(limit as string, 10);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const where: any = {};
-
-        if (level) {
-            where.level = level;
-        }
-
-        if (service) {
-            where.service = {
-                contains: service,
-                mode: 'insensitive',
-            };
-        }
-
-        if (message) {
-            where.message = {
-                contains: message,
-                mode: 'insensitive',
-            };
-        }
-
-        const totalLogs = await prisma.logEvent.count({ where });
-
-        const logs = await prisma.logEvent.findMany({
-            where,
-            skip: (pageNumber - 1) * pageSize,
-            take: pageSize,
-            orderBy: {
-                [sortBy as string]: order as string,
-            },
+        const logsResult = await getLogsService({
+            page: pageNumber,
+            limit: pageSize,
+            sortBy: sortBy as string,
+            order: order as string,
+            level: level as string | undefined,
+            service: service as string | undefined,
+            message: message as string | undefined,
         });
 
-        res.json({
-            data: logs,
-            meta: {
-                total: totalLogs,
-                page: pageNumber,
-                pages: Math.ceil(totalLogs / pageSize),
-            },
-        });
+        res.json(logsResult);
     } catch (error) {
         console.error('Error fetching logs:', error);
         res.status(500).json({ error: 'Error fetching logs' });
@@ -71,87 +40,23 @@ export const getLogAggregation = async (req: Request, res: Response): Promise<vo
     try {
         const { groupBy } = req.query;
 
-        if (
-            !groupBy ||
-            !Object.values(Prisma.LogEventScalarFieldEnum).includes(groupBy as Prisma.LogEventScalarFieldEnum)
-        ) {
-            res.status(400).json({ error: 'Invalid groupBy parameter' });
+        const groupByStr = groupBy as string;
+
+        if (!groupByStr) {
+            res.status(400).json({ error: 'Missing groupBy parameter' });
             return;
         }
 
-        let formattedData: AggregationResult[] = [];
-
-        if (groupBy === 'service') {
-            const services = await prisma.logEvent.groupBy({
-                by: ['service'],
-            });
-
-            formattedData = await Promise.all(
-                services.map(async (service) => {
-                    const levels = await prisma.logEvent.groupBy({
-                        by: ['level'],
-                        where: { service: service.service },
-                        _count: { id: true },
-                    });
-
-                    return {
-                        group: service.service,
-                        levels: levels.reduce((acc, level) => {
-                            acc[level.level] = level._count.id;
-                            return acc;
-                        }, {} as { [key: string]: number }),
-                    };
-                })
-            );
-        } else if (groupBy === 'level') {
-            const levels = await prisma.logEvent.groupBy({
-                by: ['level'],
-            });
-
-            formattedData = await Promise.all(
-                levels.map(async (level) => {
-                    const services = await prisma.logEvent.groupBy({
-                        by: ['service'],
-                        where: { level: level.level },
-                        _count: { id: true },
-                    });
-
-                    return {
-                        group: level.level,
-                        services: services.reduce((acc, service) => {
-                            acc[service.service] = service._count.id;
-                            return acc;
-                        }, {} as { [key: string]: number }),
-                    };
-                })
-            );
-        } else if (groupBy === 'message') {
-            const messages = await prisma.logEvent.groupBy({
-                by: ['message'],
-            });
-
-            formattedData = await Promise.all(
-                messages.map(async (message) => {
-                    const levels = await prisma.logEvent.groupBy({
-                        by: ['level'],
-                        where: { message: message.message },
-                        _count: { id: true },
-                    });
-
-                    return {
-                        group: message.message,
-                        levels: levels.reduce((acc, level) => {
-                            acc[level.level] = level._count.id;
-                            return acc;
-                        }, {} as { [key: string]: number }),
-                    };
-                })
-            );
-        }
+        const formattedData = await getLogAggregationService(groupByStr);
 
         res.json(formattedData);
-    } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
         console.error('Error fetching log aggregation:', error);
-        res.status(500).json({ error: 'Error fetching log aggregation' });
+        if (error.message === 'Invalid groupBy parameter') {
+            res.status(400).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Error fetching log aggregation' });
+        }
     }
 };

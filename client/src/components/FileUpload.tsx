@@ -50,7 +50,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
 
     return (
         <div>
-            <h2>Upload CSV File</h2>
+            <h3>Upload CSV File</h3>
             <Form onSubmit={handleSubmit}>
                 <Form.Group>
                     <Form.Control

@@ -1,25 +1,40 @@
 import React from 'react';
-import { Navbar, Nav, Button } from 'react-bootstrap';
+import { Navbar, Nav, Button, Container } from 'react-bootstrap';
+import { Link, NavLink } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 
-const AppNavbar: React.FC = () => {
+const NavBar: React.FC = () => {
     const { isAuthenticated, logout } = useAuth();
 
     return (
         <Navbar bg="primary" variant="dark" expand="lg">
-            <Navbar.Brand href="#">Log Viewer</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="ml-auto">
+            <Container>
+                <Navbar.Brand as={Link} to="/">
+                    Log Viewer
+                </Navbar.Brand>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Collapse id="basic-navbar-nav">
                     {isAuthenticated && (
-                        <Button variant="outline-light" onClick={logout}>
-                            Log Out
-                        </Button>
+                        <Nav className="me-auto">
+                            <Nav.Link as={NavLink} to="/dashboard">
+                                Dashboard
+                            </Nav.Link>
+                            <Nav.Link as={NavLink} to="/graphs">
+                                Graphs
+                            </Nav.Link>
+                        </Nav>
                     )}
-                </Nav>
-            </Navbar.Collapse>
+                    <Nav className="ms-auto">
+                        {isAuthenticated && (
+                            <Button variant="outline-light" onClick={logout}>
+                                Log Out
+                            </Button>
+                        )}
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
         </Navbar>
     );
 };
 
-export default AppNavbar;
+export default NavBar;

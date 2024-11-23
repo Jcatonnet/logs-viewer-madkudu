@@ -57,7 +57,7 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
 
     return (
         <div>
-            <h2>Log Events</h2>
+            <h3>Log Events</h3>
             <LogFilters filters={filters} handleFilterChange={handleFilterChange} />
             {loading ? (
                 <p>Loading logs...</p>
