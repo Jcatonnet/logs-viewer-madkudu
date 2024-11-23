@@ -1,20 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import FileUpload from '../components/FileUpload';
 import LogsList from '../components/LogsList';
 
 const HomePage: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, login } = useAuth();
+    const [refreshLogs, setRefreshLogs] = useState<boolean>(false);
 
     if (!isAuthenticated) {
-        return <h2>Please log in to use the application.</h2>;
+        return (
+            <div className="text-center">
+                <h2>Please log in to use the application.</h2>
+                <button className="btn btn-primary" onClick={login}>
+                    Log In
+                </button>
+            </div>
+        );
     }
+
+    const handleUploadSuccess = () => {
+        setRefreshLogs((prev) => !prev);
+    };
 
     return (
         <div>
-            <h1>Dashboard</h1>
-            <FileUpload />
-            <LogsList />
+            <h1>Welcome to the Log Viewer Application</h1>
+            <FileUpload onUploadSuccess={handleUploadSuccess} />
+            <LogsList refreshLogs={refreshLogs} />
         </div>
     );
 };

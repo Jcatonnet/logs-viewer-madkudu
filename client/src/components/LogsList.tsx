@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Pagination, Form, Row, Col, Button } from 'react-bootstrap';
+import { Table, Pagination, Form, Row, Col } from 'react-bootstrap';
 import apiClient from '../services/apiClient';
 import useAuth from '../hooks/useAuth';
 
@@ -17,8 +17,11 @@ interface MetaData {
     page: number;
     pages: number;
 }
+interface LogListProps {
+    refreshLogs: boolean;
+}
 
-const LogsList: React.FC = () => {
+const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
     const [logs, setLogs] = useState<LogEvent[]>([]);
     const [meta, setMeta] = useState<MetaData>({ total: 0, page: 1, pages: 1 });
     const [loading, setLoading] = useState<boolean>(false);
@@ -31,6 +34,10 @@ const LogsList: React.FC = () => {
         sortBy: 'timestamp',
         order: 'desc',
     });
+
+    useEffect(() => {
+        fetchLogs();
+    }, [refreshLogs]);
 
     const fetchLogs = async (page = 1) => {
         setLoading(true);
@@ -57,7 +64,7 @@ const LogsList: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchLogs();
+        fetchLogs(1);
     }, [filters]);
 
     const handlePageChange = (pageNumber: number) => {
@@ -102,6 +109,18 @@ const LogsList: React.FC = () => {
             <Form>
                 <Row>
                     <Col>
+                        <Form.Group controlId="filterService">
+                            <Form.Label>Service</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="service"
+                                value={filters.service}
+                                onChange={handleFilterChange}
+                                placeholder="Service name"
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
                         <Form.Group controlId="filterLevel">
                             <Form.Label>Level</Form.Label>
                             <Form.Control
@@ -112,21 +131,11 @@ const LogsList: React.FC = () => {
                             >
                                 <option value="">All</option>
                                 <option value="INFO">INFO</option>
-                                <option value="WARN">WARN</option>
+                                <option value="WARNING">WARNING</option>
                                 <option value="ERROR">ERROR</option>
+                                <option value="DEBUG">DEBUG</option>
+                                <option value="CRITICAL">CRITICAL</option>
                             </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="filterService">
-                            <Form.Label>Service</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="service"
-                                value={filters.service}
-                                onChange={handleFilterChange}
-                                placeholder="Service name"
-                            />
                         </Form.Group>
                     </Col>
                     <Col>
@@ -142,9 +151,6 @@ const LogsList: React.FC = () => {
                         </Form.Group>
                     </Col>
                     <Col className="d-flex align-items-end">
-                        <Button variant="primary" onClick={() => fetchLogs()}>
-                            Apply Filters
-                        </Button>
                     </Col>
                 </Row>
             </Form>
@@ -160,7 +166,6 @@ const LogsList: React.FC = () => {
                                 <th onClick={() => handleSortChange('service')}>Service</th>
                                 <th onClick={() => handleSortChange('level')}>Level</th>
                                 <th>Message</th>
-                                <th onClick={() => handleSortChange('lineNumber')}>Line Number</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -171,7 +176,6 @@ const LogsList: React.FC = () => {
                                     <td>{log.service}</td>
                                     <td>{log.level}</td>
                                     <td>{log.message}</td>
-                                    <td>{log.lineNumber}</td>
                                 </tr>
                             ))}
                         </tbody>

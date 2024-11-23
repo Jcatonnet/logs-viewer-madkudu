@@ -1,17 +1,18 @@
-// src/components/FileUpload.tsx
-
 import React, { useState } from 'react';
 import { Form, Button, Alert, ProgressBar } from 'react-bootstrap';
-
-import useAuth from '../hooks/useAuth';
 import apiClient from '../services/apiClient';
+import useAuth from '../hooks/useAuth';
 
 interface Error {
     lineNumber: number;
     error: string;
 }
 
-const FileUpload: React.FC = () => {
+interface FileUploadProps {
+    onUploadSuccess: () => void;
+}
+
+const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
     const [file, setFile] = useState<File | null>(null);
     const [errors, setErrors] = useState<Error[]>([]);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -52,6 +53,7 @@ const FileUpload: React.FC = () => {
             } else {
                 setErrors([]);
                 alert('File uploaded and processed successfully.');
+                onUploadSuccess();
             }
         } catch (error: any) {
             if (error.response && error.response.data.errors) {
@@ -73,6 +75,7 @@ const FileUpload: React.FC = () => {
                         required
                         accept=".csv"
                     />
+
                 </Form.Group>
                 <Button type="submit" disabled={!file}>
                     Upload

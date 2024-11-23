@@ -4,7 +4,7 @@ import prisma from '../prisma/prisma';
 export const getLogs = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            cursor,
+            page = '1',
             limit = '25',
             sortBy = 'timestamp',
             order = 'desc',
@@ -13,6 +13,7 @@ export const getLogs = async (req: Request, res: Response): Promise<void> => {
             message,
         } = req.query;
 
+        const pageNumber = parseInt(page as string, 10);
         const pageSize = parseInt(limit as string, 10);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,42 +37,23 @@ export const getLogs = async (req: Request, res: Response): Promise<void> => {
             };
         }
 
-        // Build the orderBy clause
-        const orderField = sortBy as string;
-        const orderDirection = order as string;
+        const totalLogs = await prisma.logEvent.count({ where });
 
-        // Build the pagination query
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const paginationQuery: any = {
+        const logs = await prisma.logEvent.findMany({
             where,
-            take: pageSize + 1, // Fetch one extra item to check if there's a next page
+            skip: (pageNumber - 1) * pageSize,
+            take: pageSize,
             orderBy: {
-                [orderField]: orderDirection,
+                [sortBy as string]: order as string,
             },
-        };
-
-        // If cursor is provided, add it to the query
-        if (cursor) {
-            paginationQuery.cursor = {
-                id: parseInt(cursor as string, 10),
-            };
-            paginationQuery.skip = 1; // Skip the cursor itself
-        }
-
-        // Execute the query
-        const logs = await prisma.logEvent.findMany(paginationQuery);
-
-        // Determine if there is a next page
-        let nextCursor: number | null = null;
-        if (logs.length > pageSize) {
-            const nextItem = logs.pop(); // Remove the extra item
-            nextCursor = nextItem?.id || null;
-        }
+        });
 
         res.json({
             data: logs,
             meta: {
-                nextCursor,
+                total: totalLogs,
+                page: pageNumber,
+                pages: Math.ceil(totalLogs / pageSize),
             },
         });
     } catch (error) {

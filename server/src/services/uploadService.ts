@@ -10,6 +10,8 @@ interface LogEvent {
     lineNumber: number;
 }
 
+const EXPECTED_HEADERS = ['timestamp', 'service', 'level', 'message'];
+
 export const processCSVData = (fileBuffer: Buffer): Promise<{
     success: boolean;
     errors?: { lineNumber: number; error: string }[];
@@ -18,6 +20,7 @@ export const processCSVData = (fileBuffer: Buffer): Promise<{
         const results: LogEvent[] = [];
         const errors: { lineNumber: number; error: string }[] = [];
         let lineNumber = 1;
+        let headersValidated = false;
 
         try {
             const stream = Readable.from(fileBuffer.toString());
@@ -29,6 +32,22 @@ export const processCSVData = (fileBuffer: Buffer): Promise<{
                     reject(new Error('Error processing CSV file'));
                 })
                 .on('data', (data) => {
+                    if (!headersValidated) {
+                        const headers = Object.keys(data);
+                        const missingHeaders = EXPECTED_HEADERS.filter(
+                            (header) => !headers.includes(header)
+                        );
+
+                        if (missingHeaders.length > 0) {
+                            reject(
+                                new Error(
+                                    `Wrong file format. Missing required columns: ${missingHeaders.join(', ')}. Expected columns: ${EXPECTED_HEADERS.join(', ')}`
+                                )
+                            );
+                            return;
+                        }
+                        headersValidated = true;
+                    }
                     lineNumber++;
                     try {
                         if (!data.timestamp || !data.service || !data.level || !data.message) {
