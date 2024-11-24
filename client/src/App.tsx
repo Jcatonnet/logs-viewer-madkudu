@@ -4,6 +4,8 @@ import useAuth from './hooks/useAuth';
 import GraphsPage from './pages/GraphPage';
 import Navbar from './components/Navbar';
 import DashboardPage from './pages/DashboardPage';
+import LoginPage from './pages/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -14,26 +16,55 @@ const App: React.FC = () => {
   };
 
   if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <p className="text-center my-5">Loading...</p>;
   }
 
   return (
     <Router>
-      <Navbar />
-      <div className="container mt-4">
-        <Routes>
-          <Route
-            path="/dashboard"
-            element={<DashboardPage onUploadSuccess={handleUploadSuccess} refreshLogs={refreshLogs} />}
-          />
-          <Route path="/graphs" element={<GraphsPage refreshLogs={refreshLogs} />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </div>
+      <>
+        <Navbar />
+        <div className="container mt-4">
+          <Routes>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute
+                  element={
+                    <DashboardPage
+                      onUploadSuccess={handleUploadSuccess}
+                      refreshLogs={refreshLogs}
+                    />
+                  }
+                />
+              }
+            />
+            <Route
+              path="/graphs"
+              element={
+                <ProtectedRoute
+                  element={<GraphsPage refreshLogs={refreshLogs} />}
+                />
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+              }
+            />
+            <Route
+              path="/"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+          </Routes>
+        </div>
+      </>
     </Router>
   );
 };

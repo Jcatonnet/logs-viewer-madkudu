@@ -57,35 +57,47 @@ const GraphsPage: React.FC<GraphsPageProps> = ({ refreshLogs }) => {
                 ? Array.from(new Set(data.flatMap((item) => Object.keys(item.services || {}))))
                 : [];
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <p className="text-center my-5">Loading...</p>;
 
     return (
         <div>
-            <h2>Graphs</h2>
+            <h2>Graph logs view</h2>
             <Form>
-                <Row>
-                    <Col xs={12} md={4}>
-                        <Form.Group controlId="groupBy">
-                            <Form.Label>Aggregate By</Form.Label>
-                            <Form.Control as="select" value={groupBy} onChange={handleGroupByChange}>
-                                <option value="service">Service</option>
-                                <option value="level">Level</option>
-                                <option value="message">Message</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                </Row>
+                <div className='mb-4 mt-4'>
+                    <Row>
+                        <Col xs={12} md={4}>
+                            <Form.Group controlId="groupBy">
+                                <Form.Label>Select your aggregated view:</Form.Label>
+                                <Form.Control as="select" value={groupBy} onChange={handleGroupByChange}>
+                                    <option value="service">Service</option>
+                                    <option value="level">Level</option>
+                                    <option value="message">Message</option>
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                </div>
+
             </Form>
-            {groupBy === 'message' ? (
-                <PieChartComponent data={generateTopMessagesData()} />
-            ) : (
-                <StackedBarChartComponent
-                    data={processChartData()}
-                    keys={keys}
-                    colors={COLORS}
-                    xAxisKey="group"
-                />
-            )}
+            <div className="d-flex justify-content-center align-items-center mt-5">
+                {groupBy === 'message' ? (
+                    <div className="d-flex flex-column align-items-center w-100">
+                        <p className="mb-3">Top 10 messages</p>
+                        <PieChartComponent data={generateTopMessagesData()} />
+                    </div>
+                ) : (
+                    <div className="d-flex flex-column align-items-center w-100">
+                        {groupBy === 'service' && <p className="mb-3">Levels distribution per service</p>}
+                        {groupBy === 'level' && <p className="mb-3">Services distribution per level</p>}
+                        <StackedBarChartComponent
+                            data={processChartData()}
+                            keys={keys}
+                            colors={COLORS}
+                            xAxisKey="group"
+                        />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

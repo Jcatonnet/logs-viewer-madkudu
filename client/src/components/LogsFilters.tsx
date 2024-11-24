@@ -23,7 +23,7 @@ const LogFilters: React.FC<LogFiltersProps> = ({
     loading,
 }) => (
     <Form>
-        <Row>
+        <Row className='mb-4'>
             <Col>
                 <Form.Group controlId="filterService">
                     <Form.Label>Service</Form.Label>

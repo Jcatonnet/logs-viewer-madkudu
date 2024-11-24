@@ -9,7 +9,7 @@ interface StackedBarChartComponentProps {
 }
 
 const StackedBarChartComponent: React.FC<StackedBarChartComponentProps> = ({ data, keys, colors, xAxisKey }) => (
-    <ResponsiveContainer width="100%" height={400}>
+    <ResponsiveContainer width="80%" height={400}>
         <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <XAxis dataKey={xAxisKey} />
             <YAxis />

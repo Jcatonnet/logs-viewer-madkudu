@@ -5,7 +5,7 @@ import useAuth from '../hooks/useAuth';
 import StackedBarChartComponent from './charts/StackedBarChartComponent';
 import PieChartComponent from './charts/PieChartComponent';
 
-const COLORS = ['#00C49F', '#FF0000', '#FFBB28', '#0088FE', '#FF8042'];
+const COLORS = ['#198754', '#FF0000', '#FFC107', '#0D6EFD', '#212529'];
 
 interface AggregatedData {
     group: string;
@@ -89,7 +89,7 @@ const LogGraph: React.FC<LogGraphProps> = ({ refreshLogs }) => {
                 )
                 : [];
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <p className="text-center my-5">Loading...</p>;
 
     return (
         <div>

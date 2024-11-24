@@ -1,5 +1,6 @@
 import React from 'react';
-import { Table } from 'react-bootstrap';
+import { Badge, Table } from 'react-bootstrap';
+import { levelVariant } from '../helpers/formatter';
 
 interface LogEvent {
     id: number;
@@ -32,7 +33,10 @@ const LogsTable: React.FC<LogsTableProps> = ({ logs, handleSortChange }) => (
                     <td>{log.id}</td>
                     <td>{new Date(log.timestamp).toLocaleString()}</td>
                     <td>{log.service}</td>
-                    <td>{log.level}</td>
+                    <td>
+                        <Badge pill bg={levelVariant(log.level)}>
+                            {log.level}
+                        </Badge></td>
                     <td>{log.message}</td>
                 </tr>
             ))}

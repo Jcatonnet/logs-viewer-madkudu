@@ -61,7 +61,7 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
 
     return (
         <div>
-            <h3>Log Events</h3>
+            <h4>Log Events</h4>
             <LogFilters
                 filters={filters}
                 handleFilterChange={handleFilterChange}
@@ -70,11 +70,13 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
                 loading={optionsLoading}
             />
             {loading ? (
-                <p>Loading logs...</p>
+                <p className="text-center my-5">Loading logs...</p>
             ) : (
                 <>
                     <LogsTable logs={logs} handleSortChange={handleSortChange} />
-                    <Pagination>{renderPagination()}</Pagination>
+                    <div className="d-flex justify-content-center">
+                        <Pagination>{renderPagination()}</Pagination>
+                    </div>
                 </>
             )}
         </div>

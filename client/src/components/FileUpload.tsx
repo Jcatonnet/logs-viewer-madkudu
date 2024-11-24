@@ -49,20 +49,23 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
     };
 
     return (
-        <div>
-            <h3>Upload CSV File</h3>
+        <div className='mt-4'>
+            <h4>Upload CSV File</h4>
             <Form onSubmit={handleSubmit}>
-                <Form.Group>
-                    <Form.Control
-                        type="file"
-                        onChange={handleFileChange}
-                        required
-                        accept=".csv"
-                    />
-                </Form.Group>
-                <Button type="submit" disabled={!file}>
-                    Upload
-                </Button>
+                <div className="d-flex align-items-center mb-4 mt-2 gap-2">
+
+                    <Form.Group>
+                        <Form.Control
+                            type="file"
+                            onChange={handleFileChange}
+                            required
+                            accept=".csv"
+                        />
+                    </Form.Group>
+                    <Button type="submit" disabled={!file}>
+                        Upload
+                    </Button>
+                </div>
             </Form>
             {uploadProgress > 0 && uploadProgress < 100 && (
                 <ProgressBar now={uploadProgress} label={`${uploadProgress}%`} />
