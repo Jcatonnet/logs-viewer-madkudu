@@ -1,12 +1,20 @@
 import request from 'supertest';
 import { sign } from 'jsonwebtoken';
-import app from './app';
-import prisma from './prisma/prisma';
 import { beforeAll, beforeEach, describe, it, expect } from '@jest/globals';
-import dotenv from 'dotenv';
 
+const mockPrisma = {
+    logEvent: {
+        findMany: jest.fn(),
+        count: jest.fn(),
+        createMany: jest.fn(),
+        deleteMany: jest.fn(),
+    },
+};
 
-dotenv.config({ path: '.env.test' });
+jest.mock('./prisma/prisma', () => ({
+    __esModule: true,
+    default: mockPrisma
+}));
 
 jest.mock('./middleware/auth', () => {
     return jest.fn((req, res, next) => {
@@ -18,6 +26,8 @@ jest.mock('./middleware/auth', () => {
     });
 });
 
+import app from './app';
+
 describe('Logs API', () => {
     let authToken: string;
 
@@ -25,29 +35,34 @@ describe('Logs API', () => {
         authToken = sign({ sub: 'test-user' }, process.env.JWT_SECRET || 'test-secret');
     });
 
-    beforeEach(async () => {
-        await prisma.logEvent.createMany({
-            data: [
-                {
-                    timestamp: new Date('2024-01-01T12:00:00Z'),
-                    service: 'TestService',
-                    level: 'INFO',
-                    message: 'Test message',
-                    lineNumber: 1
-                },
-                {
-                    timestamp: new Date('2024-01-01T12:01:00Z'),
-                    service: 'TestService',
-                    level: 'ERROR',
-                    message: 'Error message',
-                    lineNumber: 2
-                }
-            ]
-        });
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
     describe('GET /api/logs', () => {
+        const mockLogs = [
+            {
+                id: 1,
+                timestamp: new Date('2024-01-01T12:00:00Z'),
+                service: 'TestService',
+                level: 'INFO',
+                message: 'Test message',
+                lineNumber: 1,
+            },
+            {
+                id: 2,
+                timestamp: new Date('2024-01-01T12:01:00Z'),
+                service: 'TestService',
+                level: 'ERROR',
+                message: 'Error message',
+                lineNumber: 2,
+            },
+        ];
+
         it('should return logs with pagination', async () => {
+            mockPrisma.logEvent.findMany.mockResolvedValue(mockLogs);
+            mockPrisma.logEvent.count.mockResolvedValue(2);
+
             const response = await request(app)
                 .get('/api/logs')
                 .set('Authorization', `Bearer ${authToken}`)
@@ -56,9 +71,14 @@ describe('Logs API', () => {
             expect(response.body).toHaveProperty('data');
             expect(response.body).toHaveProperty('meta');
             expect(response.body.data).toHaveLength(2);
+            expect(mockPrisma.logEvent.findMany).toHaveBeenCalled();
         });
 
         it('should filter by level', async () => {
+            const errorLog = mockLogs.filter(log => log.level === 'ERROR');
+            mockPrisma.logEvent.findMany.mockResolvedValue(errorLog);
+            mockPrisma.logEvent.count.mockResolvedValue(1);
+
             const response = await request(app)
                 .get('/api/logs?level=ERROR')
                 .set('Authorization', `Bearer ${authToken}`)

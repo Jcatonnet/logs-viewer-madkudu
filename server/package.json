@@ -2,16 +2,15 @@
     "name": "server",
     "version": "1.0.0",
     "main": "index.js",
-    "type": "module",
     "scripts": {
-        "dev": "nodemon src/index.ts",
+        "dev": "nodemon --exec ts-node src/index.ts",
         "start": "node build/index.js",
         "build": "tsc",
         "lint": "eslint src/**/*.ts",
         "lint:fix": "eslint src/**/*.ts --fix",
         "format": "prettier . --write",
-        "test": "jest",
-        "test:watch": "jest --watch"
+        "test": "NODE_ENV=test jest",
+        "test:watch": "NODE_ENV=test jest --watch"
     },
     "keywords": [],
     "author": "",
@@ -23,7 +22,7 @@
         "@types/jest": "^29.5.14",
         "@types/jsonwebtoken": "^9.0.7",
         "@types/multer": "^1.4.12",
-        "@types/node": "^22.9.1",
+        "@types/node": "^22.9.3",
         "@types/supertest": "^6.0.2",
         "@typescript-eslint/eslint-plugin": "^8.15.0",
         "@typescript-eslint/parser": "^8.15.0",
