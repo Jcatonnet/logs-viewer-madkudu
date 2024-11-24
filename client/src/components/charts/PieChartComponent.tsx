@@ -24,9 +24,9 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({ data }) => {
                     cx="50%"
                     cy="50%"
                     outerRadius={150}
-                    label={({ name, value }) => `${name}`}
+                    label={({ name }) => `${name}`}
                 >
-                    {data.map((entry, index) => (
+                    {data.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={pieColors[index]} />
                     ))}
                 </Pie>
