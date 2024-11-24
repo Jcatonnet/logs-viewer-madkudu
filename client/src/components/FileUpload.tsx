@@ -3,13 +3,13 @@ import { Form, Button, ProgressBar } from 'react-bootstrap';
 import { uploadFile, UploadError } from '../services/uploadService';
 import useAuth from '../hooks/useAuth';
 import ErrorAlert from './ErrorAlert';
-import axios from 'axios';
 
 interface FileUploadProps {
     onUploadSuccess: () => void;
+    onShowToast: (message: string) => void;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onShowToast }) => {
     const [file, setFile] = useState<File | null>(null);
     const [errors, setErrors] = useState<UploadError[]>([]);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -36,7 +36,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
                 setErrors(data.errors);
             } else {
                 setErrors([]);
-                console.log('File uploaded and processed successfully.');
+                onShowToast('File uploaded and processed successfully!');
                 onUploadSuccess();
             }
         } catch (error: any) {
