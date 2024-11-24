@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth';
 import GraphsPage from './pages/GraphPage';
@@ -11,9 +11,9 @@ const App: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const [refreshLogs, setRefreshLogs] = useState<boolean>(false);
 
-  const handleUploadSuccess = () => {
-    setRefreshLogs((prev) => !prev);
-  };
+  const handleUploadSuccess = useCallback(() => {
+    setRefreshLogs(prev => !prev);
+  }, []);
 
   if (isLoading) {
     return <p className="text-center my-5">Loading...</p>;

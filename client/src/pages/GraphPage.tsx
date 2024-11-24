@@ -33,7 +33,7 @@ const GraphsPage: React.FC<GraphsPageProps> = ({ refreshLogs }) => {
         return [];
     }, [data, groupBy]);
 
-    const generateTopMessagesData = () => {
+    const generateTopMessagesData = useMemo(() => {
         if (groupBy === 'message') {
             return data
                 .sort((a, b) => {
@@ -48,14 +48,16 @@ const GraphsPage: React.FC<GraphsPageProps> = ({ refreshLogs }) => {
                 }));
         }
         return [];
-    };
+    }, [data, groupBy]);
 
-    const keys =
+    const keys = useMemo(() =>
         groupBy === 'service'
             ? ['INFO', 'ERROR', 'WARNING', 'DEBUG', 'CRITICAL']
             : groupBy === 'level'
                 ? Array.from(new Set(data.flatMap((item) => Object.keys(item.services || {}))))
-                : [];
+                : [],
+        [groupBy, data]
+    );
 
     if (loading) return <p className="text-center my-5">Loading...</p>;
 
@@ -83,7 +85,7 @@ const GraphsPage: React.FC<GraphsPageProps> = ({ refreshLogs }) => {
                 {groupBy === 'message' ? (
                     <div className="d-flex flex-column align-items-center w-100">
                         <p className="mb-3">Top 10 messages</p>
-                        <PieChartComponent data={generateTopMessagesData()} />
+                        <PieChartComponent data={generateTopMessagesData} />
                     </div>
                 ) : (
                     <div className="d-flex flex-column align-items-center w-100">

@@ -49,23 +49,24 @@ export const getLogs = async (params: GetLogsParams) => {
         };
     }
 
-    const totalLogs = await prisma.logEvent.count({ where });
-
-    const logs = await prisma.logEvent.findMany({
-        where,
-        skip: (pageNumber - 1) * pageSize,
-        take: pageSize,
-        orderBy: {
-            [sortBy]: order as Prisma.SortOrder,
-        },
-        select: {
-            id: true,
-            timestamp: true,
-            service: true,
-            level: true,
-            message: true,
-        },
-    });
+    const [totalLogs, logs] = await Promise.all([
+        prisma.logEvent.count({ where }),
+        prisma.logEvent.findMany({
+            where,
+            skip: (pageNumber - 1) * pageSize,
+            take: pageSize,
+            orderBy: {
+                [sortBy]: order as Prisma.SortOrder,
+            },
+            select: {
+                id: true,
+                timestamp: true,
+                service: true,
+                level: true,
+                message: true,
+            },
+        }),
+    ]);
 
     return {
         data: logs,

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pagination } from 'react-bootstrap';
 import { useLogs } from '../hooks/useLogs';
 import { useFilterOptions } from '../hooks/useFilterOptions';
@@ -21,28 +21,25 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
     const { logs, meta, loading, fetchLogs } = useLogs(filters, refreshLogs);
     const { serviceOptions, levelOptions, loading: optionsLoading } = useFilterOptions();
 
-    const handlePageChange = (pageNumber: number) => {
+    const handlePageChange = useCallback((pageNumber: number) => {
         fetchLogs(pageNumber);
-    };
+    }, [fetchLogs]);
 
-    const handleFilterChange = (
-        e: React.ChangeEvent<HTMLTextAreaElement>
-    ) => {
+    const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFilters({
-            ...filters,
+        setFilters(prev => ({
+            ...prev,
             [name]: value,
-        });
-    };
+        }));
+    }, []);
 
-    const handleSortChange = (sortField: string) => {
-        setFilters({
-            ...filters,
+    const handleSortChange = useCallback((sortField: string) => {
+        setFilters(prev => ({
+            ...prev,
             sortBy: sortField,
-            order: filters.order === 'asc' ? 'desc' : 'asc',
-        });
-    };
-
+            order: prev.order === 'asc' ? 'desc' : 'asc',
+        }));
+    }, []);
     const renderPagination = useMemo(() => {
         const items = [];
         for (let number = 1; number <= meta.pages; number++) {
