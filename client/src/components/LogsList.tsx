@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pagination } from 'react-bootstrap';
 import { useLogs } from '../hooks/useLogs';
 import { useFilterOptions } from '../hooks/useFilterOptions';
@@ -43,7 +43,7 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
         });
     };
 
-    const renderPagination = () => {
+    const renderPagination = useMemo(() => {
         const items = [];
         for (let number = 1; number <= meta.pages; number++) {
             items.push(
@@ -57,7 +57,7 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
             );
         }
         return items;
-    };
+    }, [meta.pages, meta.page]);
 
     return (
         <div>
@@ -75,7 +75,7 @@ const LogsList: React.FC<LogListProps> = ({ refreshLogs }) => {
                 <>
                     <LogsTable logs={logs} handleSortChange={handleSortChange} />
                     <div className="d-flex justify-content-center">
-                        <Pagination>{renderPagination()}</Pagination>
+                        <Pagination>{renderPagination}</Pagination>
                     </div>
                 </>
             )}

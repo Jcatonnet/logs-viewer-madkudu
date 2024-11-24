@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 import StackedBarChartComponent from '../components/charts/StackedBarChartComponent';
 import PieChartComponent from '../components/charts/PieChartComponent';
@@ -18,7 +18,7 @@ const GraphsPage: React.FC<GraphsPageProps> = ({ refreshLogs }) => {
         setGroupBy(e.target.value);
     };
 
-    const processChartData = () => {
+    const processChartData = useMemo(() => {
         if (groupBy === 'service') {
             return data.map((item) => ({
                 group: item.group,
@@ -31,7 +31,7 @@ const GraphsPage: React.FC<GraphsPageProps> = ({ refreshLogs }) => {
             }));
         }
         return [];
-    };
+    }, [data, groupBy]);
 
     const generateTopMessagesData = () => {
         if (groupBy === 'message') {
@@ -90,7 +90,7 @@ const GraphsPage: React.FC<GraphsPageProps> = ({ refreshLogs }) => {
                         {groupBy === 'service' && <p className="mb-3">Levels distribution per service</p>}
                         {groupBy === 'level' && <p className="mb-3">Services distribution per level</p>}
                         <StackedBarChartComponent
-                            data={processChartData()}
+                            data={processChartData}
                             keys={keys}
                             colors={COLORS}
                             xAxisKey="group"

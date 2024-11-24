@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import apiClient from '../services/apiClient';
 import useAuth from './useAuth';
 
@@ -31,7 +31,7 @@ export const useLogs = (filters: Filters, refreshLogs: boolean) => {
     const [loading, setLoading] = useState<boolean>(false);
     const { getAccessToken } = useAuth();
 
-    const fetchLogs = async (page = 1) => {
+    const fetchLogs = useCallback(async (page = 1) => {
         setLoading(true);
         try {
             const token = await getAccessToken();
@@ -53,7 +53,7 @@ export const useLogs = (filters: Filters, refreshLogs: boolean) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [getAccessToken, filters]);
 
     useEffect(() => {
         fetchLogs(1);

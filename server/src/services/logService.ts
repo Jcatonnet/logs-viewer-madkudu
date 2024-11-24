@@ -58,6 +58,13 @@ export const getLogs = async (params: GetLogsParams) => {
         orderBy: {
             [sortBy]: order as Prisma.SortOrder,
         },
+        select: {
+            id: true,
+            timestamp: true,
+            service: true,
+            level: true,
+            message: true,
+        },
     });
 
     return {
@@ -81,6 +88,19 @@ export const getLogAggregation = async (groupBy: string): Promise<AggregationRes
         const data = await prisma.logEvent.groupBy({
             by: ['service', 'level'],
             _count: { id: true },
+            having: {
+                id: {
+                    _count: {
+                        gt: 0,
+                    },
+                },
+            },
+            orderBy: {
+                _count: {
+                    id: 'desc'
+                }
+            },
+            take: 100,
         });
 
         const groupedData = data.reduce((acc, item) => {

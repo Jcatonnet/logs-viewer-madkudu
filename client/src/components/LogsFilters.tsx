@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
 interface Filters {
@@ -15,7 +15,7 @@ interface LogFiltersProps {
     loading: boolean;
 }
 
-const LogFilters: React.FC<LogFiltersProps> = ({
+const LogFilters: React.FC<LogFiltersProps> = memo(({
     filters,
     handleFilterChange,
     serviceOptions,
@@ -76,6 +76,6 @@ const LogFilters: React.FC<LogFiltersProps> = ({
             </Col>
         </Row>
     </Form>
-);
+));
 
 export default LogFilters;
