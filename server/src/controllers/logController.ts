@@ -21,6 +21,11 @@ export const getLogs = async (req: Request, res: Response): Promise<void> => {
         const pageNumber = parseInt(page as string, 10);
         const pageSize = parseInt(limit as string, 10);
 
+        if (isNaN(pageNumber) || isNaN(pageSize)) {
+            res.status(400).json({ error: 'Invalid pagination parameters' });
+            return;
+        }
+
         const logsResult = await getLogsService({
             page: pageNumber,
             limit: pageSize,

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiClient from '../services/apiClient';
 import useAuth from './useAuth';
+import { PAGINATION_LIMITS } from '../helpers/pagination';
 
 interface LogEvent {
     id: number;
@@ -41,10 +42,14 @@ export const useLogs = (filters: Filters, refreshLogs: boolean) => {
                 },
                 params: {
                     page,
-                    limit: 25,
+                    limit: PAGINATION_LIMITS.DEFAULT_PAGE_SIZE,
                     ...filters,
                 },
             });
+
+            if (response.data.meta.total > PAGINATION_LIMITS.MAX_PAGE_SIZE * 10) {
+                console.warn('Large dataset detected, consider implementing data virtualization');
+            }
 
             setLogs(response.data.data);
             setMeta(response.data.meta);

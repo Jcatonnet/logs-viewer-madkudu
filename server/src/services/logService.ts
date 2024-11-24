@@ -1,3 +1,4 @@
+import { PAGINATION_LIMITS } from '../helpers/pagination';
 import prisma from '../prisma/prisma';
 import { Prisma } from '@prisma/client';
 
@@ -26,8 +27,11 @@ export const getLogs = async (params: GetLogsParams) => {
         message,
     } = params;
 
-    const pageNumber = page;
-    const pageSize = limit;
+    const pageNumber = Math.max(1, page);
+    const pageSize = Math.min(
+        Math.max(PAGINATION_LIMITS.MIN_PAGE_SIZE, limit),
+        PAGINATION_LIMITS.MAX_PAGE_SIZE
+    );
 
     const where: Prisma.LogEventWhereInput = {};
 
