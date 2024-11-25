@@ -1,9 +1,9 @@
-### Log Viewer Application
+### Logs Viewer Application
 A full-stack application for visualizing and analyzing log data with filtering, sorting, and graphical representations.
 
 #### Deployment
 The application is configured for deployment on Vercel with separate frontend and backend services.
-the production app can be accessed here: [https://logs-viewer-madkudu-fe.vercel.app/dashboard](https://logs-viewer-madkudu-fe.vercel.app/dashboard)
+the production app can be accessed here: [https://logs-viewer-madkudu-fe.vercel.app/](https://logs-viewer-madkudu-fe.vercel.app/)
 
 ### Architecture
 #### Frontend (React + TypeScript)
